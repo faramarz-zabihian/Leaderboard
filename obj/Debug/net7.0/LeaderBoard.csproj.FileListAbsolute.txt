@@ -1,0 +1,14 @@
+d:\ppp\LeaderBoard\bin\Debug\net7.0\LeaderBoard.exe
+d:\ppp\LeaderBoard\bin\Debug\net7.0\LeaderBoard.deps.json
+d:\ppp\LeaderBoard\bin\Debug\net7.0\LeaderBoard.runtimeconfig.json
+d:\ppp\LeaderBoard\bin\Debug\net7.0\LeaderBoard.dll
+d:\ppp\LeaderBoard\bin\Debug\net7.0\LeaderBoard.pdb
+d:\ppp\LeaderBoard\obj\Debug\net7.0\LeaderBoard.GeneratedMSBuildEditorConfig.editorconfig
+d:\ppp\LeaderBoard\obj\Debug\net7.0\LeaderBoard.AssemblyInfoInputs.cache
+d:\ppp\LeaderBoard\obj\Debug\net7.0\LeaderBoard.AssemblyInfo.cs
+d:\ppp\LeaderBoard\obj\Debug\net7.0\LeaderBoard.csproj.CoreCompileInputs.cache
+d:\ppp\LeaderBoard\obj\Debug\net7.0\LeaderBoard.dll
+d:\ppp\LeaderBoard\obj\Debug\net7.0\refint\LeaderBoard.dll
+d:\ppp\LeaderBoard\obj\Debug\net7.0\LeaderBoard.pdb
+d:\ppp\LeaderBoard\obj\Debug\net7.0\LeaderBoard.genruntimeconfig.cache
+d:\ppp\LeaderBoard\obj\Debug\net7.0\ref\LeaderBoard.dll
