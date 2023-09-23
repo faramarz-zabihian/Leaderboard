@@ -1,17 +1,22 @@
 ﻿class NotifyGroup
 {
-    public List<Player> Players = null;
-    public Player? NextPlayer;
-    public Player? PrevPlayer;
+    public DateTime Created;
+    public ScoreGroup group = null;
+    public DateTime first_changed;
     public int Score;
-    private Player? LowerRank = null;
-    private Player? HigherRank = null;
-
-    public NotifyGroup(List<Player> players, Player? lowerRankPlayer, Player? higherRankPlayer, int score)
+    private String? LowerRankName = null;
+    private int? LowerRankScore = null;
+    private String? HighRankName = null;
+    private int? HighRankScore = null;
+    
+    public NotifyGroup(ScoreGroup scoreGroup, Player? lowerRankPlayer, Player? higherRankPlayer, int score, DateTime changeTime)
     {
-        Players = players;
-        LowerRank = lowerRankPlayer;
-        HigherRank = higherRankPlayer;
+        group = scoreGroup;
+        LowerRankName  = lowerRankPlayer?.Name;
+        LowerRankScore = lowerRankPlayer?.Score;
+        HighRankName =higherRankPlayer?.Name;
+        HighRankScore = higherRankPlayer?.Score;
         Score = score;
+        first_changed = changeTime;
     }
 }

@@ -1,0 +1,16 @@
+.vs\*.*
+bin\*.*
+obj\*.*
+*.v2
+*.vsidx
+*.v2
+*.vsidx
+*.vsidx
+.vs/LeaderBoard/v17/.suo
+*.bin
+*.bin
+*.dll
+*.pdb
+*.cache
+*.v2
+.vs/LeaderBoard/v17/.futdcache.v2

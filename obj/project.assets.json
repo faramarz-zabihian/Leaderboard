@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "d:\\ppp\\LeaderBoard\\LeaderBoard.csproj",
+      "projectUniqueName": "I:\\GitHub\\LeaderBoard\\LeaderBoard.csproj",
       "projectName": "LeaderBoard",
-      "projectPath": "d:\\ppp\\LeaderBoard\\LeaderBoard.csproj",
+      "projectPath": "I:\\GitHub\\LeaderBoard\\LeaderBoard.csproj",
       "packagesPath": "C:\\Users\\asus\\.nuget\\packages\\",
-      "outputPath": "d:\\ppp\\LeaderBoard\\obj\\",
+      "outputPath": "I:\\GitHub\\LeaderBoard\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

@@ -46,13 +46,16 @@ int removePlayers = 0;
 Console.WriteLine($"start spa with:{spa.Length}");
 var exit_task = false;
 Task t = Task.Run(() => { NotifyRunner(); });
+int single_notifications = 0;
+int by_group_notifications = 0;
+int noti_invokations = 0;
 
 
 for (int i = 0; i < 1000000; i++)
 {
     // choose an arbitrary ScoreGroup
     var sg = spa[rnd.Next(spa.Length)].CurrentItem();
-    if (sg== null)
+    if (sg == null)
         continue;
     var player = sg.Players[0];
     // re rank the player
@@ -67,15 +70,21 @@ Console.WriteLine($"removed {removedCount}");
 Console.WriteLine($"updates : {updateCount}");
 Console.WriteLine($"remove players : {removePlayers}");
 Console.WriteLine($"spa:{spa.Length}");
+Console.WriteLine();
+Console.WriteLine($"single_notifications:{single_notifications}");
+Console.WriteLine($"by_group_notifications:{by_group_notifications}");
+Console.WriteLine($"group noti_invokations:{noti_invokations}");
+
+
 Console.ReadKey();
 
 void newScore(int id, int old_score, int new_score)
 {
     Iterator<ScoreGroup>? newScoreIterator = null;
 
-    var tf_old_score = spa[old_score];    
+    var tf_old_score = spa[old_score];
     var new_score_ScoreGroup = spa[new_score].CurrentItem();
-    
+
     ScoreGroup currGroup = tf_old_score.CurrentItem()!;
     var old_score_delegate_player = currGroup.getDelegate();
 
@@ -98,6 +107,9 @@ void newScore(int id, int old_score, int new_score)
 
     if (currGroup.GroupCount == 0) // the group must be removed
     {
+        if (notified_groups.ContainsKey(old_score))
+            notified_groups.Remove(old_score);
+
         removed_group_top_neighbor = spa.Remove(old_score); // removes score, and gets nearest higher rank
         tf_old_score = null;                                // make sure it's not accidentally used
         oldRemoved = true;
@@ -133,27 +145,32 @@ void newScore(int id, int old_score, int new_score)
     }
     // list of score groups that must be notified 
     // p2, p1, c, n1, n2
-    // if group c is going to be notified then p1 and n1 must be checked
-    // if c removed then n1 becomes current, p1 and n1 must be notified
-    // if c is inserted p2 p1 c n1 n2, p2 then n1 and p1 are going to be notified
 
-    notified_groups.Clear(); 
+    // if group c is going to be notified then p1 and n1 must be traversed for their delegates
+    // (1)- if c removed then n1 becomes current, p1 and n1 must be notified
+    // (2)- if c is inserted p2 p1 c n1 n2, p2 then n1 and p1 are going to be notified
+    // (3)- if a player from c1 moves to n? and the player is the delegate of c, then p1, n1 must be notified
+    // (4)- if a player relocates from c  to n?, the player must be notified
 
-    if (newScoreIterator != null) // The group is new, its new neighbors are definitly affected
-    {     
-        newScoreIterator.MoveForward();                
+    // // the plyaer simply has changed its group, he/she is the one to be notified
+    notified_groups.Clear();
+    bool notify_player = true; // case 4 : the player must be notofied
+    if (new_score_ScoreGroup == null) // case 2: The entering group is new, its new neighbors are definitly affected
+    {
+        newScoreIterator!.MoveForward();
         add_to_notification_list(newScoreIterator); // n1
-        newScoreIterator.MoveBackward();       
+        newScoreIterator.MoveBackward();
         newScoreIterator.MoveBackward();
         add_to_notification_list(newScoreIterator); // p1
         newScoreIterator.MoveForward();
         add_to_notification_list(newScoreIterator); // c
+        notify_player = false;
     }
     
-    if (oldRemoved) // n1, p1 should be notified
+    if (oldRemoved) // case 1: n1, p1 should be notified
     {
         add_to_notification_list(removed_group_top_neighbor!); // n1
-        removed_group_top_neighbor!.MoveBackward(); 
+        removed_group_top_neighbor!.MoveBackward();
         add_to_notification_list(removed_group_top_neighbor);  // p1
     }
     else
@@ -162,39 +179,67 @@ void newScore(int id, int old_score, int new_score)
         if (old_score_delegate_player.Id == id) // should check if the moving player has represented his old group or not
         {
             // p2 p1 c n1 n2   : nothing is removed, an element from c has been relocated        
-            tf_old_score!.MoveBackward();  add_to_notification_list(tf_old_score);tf_old_score.MoveForward();
+            tf_old_score!.MoveBackward(); add_to_notification_list(tf_old_score); tf_old_score.MoveForward();
             tf_old_score.MoveForward(); add_to_notification_list(tf_old_score);
         }
     }
-    // now must sum up notificatios and pass them to its handler
-    /*foreach(var it in notified_groups) {
-            var p = it.Value.Players.ToArray();
-            
-            
-    }*/
+    
+    // now must sum up notificatios and pass them to another task every 5 seconds
+    DateTime eventTime = DateTime.Now.AddSeconds(-5);
+    var notify_array = notified_groups.Values.ToArray();
+    var events = new List<NotifyGroup>();
+    foreach (var it in notify_array)
+    {
+        if (it.Created < eventTime)
+        {
+            notified_groups.Remove(it.Score);
+            events.Add(it);
+            by_group_notifications += it.group.Players.Count;
+        }
+    }
+    if (events.Count > 0)
+    {
+        noti_invokations++;
+        //todo: serialize events and send them to notifier
+
+    }
+    if (notify_player) {
+        single_notifications++;
+    }
 }
 void NotifyRunner()
 {
-    while(!exit_task)
+    while (!exit_task)
     {
 
     }
 }
 
-void add_to_notification_list(Iterator<ScoreGroup>  iter) {
+void add_to_notification_list(Iterator<ScoreGroup> iter)
+{
     ScoreGroup? sg = iter.CurrentItem();
-    if (sg != null && !notified_groups.ContainsKey(sg.Score))
+    if (sg != null)
     {
-        iter.MoveForward(); 
-        var _next = iter.CurrentItem(); 
+        DateTime? dt;
+        NotifyGroup? ng = null;
+        // get the insertion time of previous instance if any
+        if (notified_groups.TryGetValue(sg.Score, out ng))
+        {
+            dt = ng.Created;
+            notified_groups.Remove(sg.Score);
+        }
+        else
+            dt = DateTime.Now;
+        iter.MoveForward();
+        var _next = iter.CurrentItem();
         iter.MoveBackward();
 
-        iter.MoveBackward(); 
-        var _prev = iter.CurrentItem(); 
+        iter.MoveBackward();
+        var _prev = iter.CurrentItem();
         iter.MoveForward();
         notified_groups.Add(
-            sg.Score, 
-            new NotifyGroup(sg.Players, _prev?.getDelegate(), _next?.getDelegate(), sg.Score)
+            sg.Score,
+            new NotifyGroup(sg, _prev?.getDelegate(), _next?.getDelegate(), sg.Score, dt.Value)
         );
     }
 };

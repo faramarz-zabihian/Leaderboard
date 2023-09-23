@@ -12,3 +12,17 @@ D:\ppp\LeaderBoard\obj\Release\net7.0\refint\LeaderBoard.dll
 D:\ppp\LeaderBoard\obj\Release\net7.0\LeaderBoard.pdb
 D:\ppp\LeaderBoard\obj\Release\net7.0\LeaderBoard.genruntimeconfig.cache
 D:\ppp\LeaderBoard\obj\Release\net7.0\ref\LeaderBoard.dll
+I:\GitHub\LeaderBoard\obj\Release\net7.0\LeaderBoard.GeneratedMSBuildEditorConfig.editorconfig
+I:\GitHub\LeaderBoard\obj\Release\net7.0\LeaderBoard.AssemblyInfoInputs.cache
+I:\GitHub\LeaderBoard\obj\Release\net7.0\LeaderBoard.AssemblyInfo.cs
+I:\GitHub\LeaderBoard\obj\Release\net7.0\LeaderBoard.csproj.CoreCompileInputs.cache
+I:\GitHub\LeaderBoard\obj\Release\net7.0\LeaderBoard.dll
+I:\GitHub\LeaderBoard\obj\Release\net7.0\refint\LeaderBoard.dll
+I:\GitHub\LeaderBoard\obj\Release\net7.0\LeaderBoard.pdb
+I:\GitHub\LeaderBoard\bin\Release\net7.0\LeaderBoard.exe
+I:\GitHub\LeaderBoard\bin\Release\net7.0\LeaderBoard.deps.json
+I:\GitHub\LeaderBoard\bin\Release\net7.0\LeaderBoard.runtimeconfig.json
+I:\GitHub\LeaderBoard\bin\Release\net7.0\LeaderBoard.dll
+I:\GitHub\LeaderBoard\bin\Release\net7.0\LeaderBoard.pdb
+I:\GitHub\LeaderBoard\obj\Release\net7.0\LeaderBoard.genruntimeconfig.cache
+I:\GitHub\LeaderBoard\obj\Release\net7.0\ref\LeaderBoard.dll

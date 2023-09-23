@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\ppp\\LeaderBoard\\LeaderBoard.csproj": {}
+    "I:\\GitHub\\LeaderBoard\\LeaderBoard.csproj": {}
   },
   "projects": {
-    "D:\\ppp\\LeaderBoard\\LeaderBoard.csproj": {
+    "I:\\GitHub\\LeaderBoard\\LeaderBoard.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\ppp\\LeaderBoard\\LeaderBoard.csproj",
+        "projectUniqueName": "I:\\GitHub\\LeaderBoard\\LeaderBoard.csproj",
         "projectName": "LeaderBoard",
-        "projectPath": "D:\\ppp\\LeaderBoard\\LeaderBoard.csproj",
+        "projectPath": "I:\\GitHub\\LeaderBoard\\LeaderBoard.csproj",
         "packagesPath": "C:\\Users\\asus\\.nuget\\packages\\",
-        "outputPath": "D:\\ppp\\LeaderBoard\\obj\\",
+        "outputPath": "I:\\GitHub\\LeaderBoard\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
