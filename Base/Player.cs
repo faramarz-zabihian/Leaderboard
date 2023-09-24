@@ -1,7 +1,12 @@
-public class Player
+using MemoryPack;
+
+[MemoryPackable]
+public partial class Player
 {
     public int Id;
     public string Name;
-    public Int32 Score;
+    /*[MemoryPackIgnore]
+    public Int32 Score;*/
+    [MemoryPackIgnore]
     public bool Fake = false;
 }

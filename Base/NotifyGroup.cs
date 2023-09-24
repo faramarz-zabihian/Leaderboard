@@ -1,22 +1,35 @@
-﻿class NotifyGroup
-{
-    public DateTime Created;
-    public ScoreGroup group = null;
-    public DateTime first_changed;
-    public int Score;
-    private String? LowerRankName = null;
-    private int? LowerRankScore = null;
-    private String? HighRankName = null;
-    private int? HighRankScore = null;
-    
-    public NotifyGroup(ScoreGroup scoreGroup, Player? lowerRankPlayer, Player? higherRankPlayer, int score, DateTime changeTime)
+﻿using MemoryPack;
+
+[MemoryPackable]
+partial class NotifyGroup
+{  
+    public readonly List<Player> Players;
+
+    [MemoryPackIgnore]
+    public readonly DateTime FirstCreated;
+
+    public readonly int Score;
+    [MemoryPackInclude]
+    private readonly String? LowerRankName = null;
+    [MemoryPackInclude]
+    private readonly int? LowerRankScore = null;
+    [MemoryPackInclude]
+    private readonly String? HighRankName = null;
+    [MemoryPackInclude]
+    private readonly int? HighRankScore = null;
+
+    [MemoryPackConstructor]
+    internal NotifyGroup(List<Player> players, string? LowerRankName, int? LowerRankScore, string? HighRankName, int? HighRankScore, int Score)
+    { 
+        this.Players = players;
+        this.LowerRankName = LowerRankName;
+        this.LowerRankScore = LowerRankScore;
+        this.HighRankName = HighRankName;
+        this.HighRankScore = HighRankScore;
+        this.Score = Score;
+    }
+    internal NotifyGroup(List<Player> players, string? LowerRankName, int? LowerRankScore, string? HighRankName, int? HighRankScore, int Score, DateTime dt): this(players, LowerRankName, LowerRankScore, HighRankName, HighRankScore, Score)
     {
-        group = scoreGroup;
-        LowerRankName  = lowerRankPlayer?.Name;
-        LowerRankScore = lowerRankPlayer?.Score;
-        HighRankName =higherRankPlayer?.Name;
-        HighRankScore = higherRankPlayer?.Score;
-        Score = score;
-        first_changed = changeTime;
+        FirstCreated = dt;
     }
 }

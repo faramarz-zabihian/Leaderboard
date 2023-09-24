@@ -26,3 +26,10 @@ I:\GitHub\LeaderBoard\obj\Debug\net7.0\refint\LeaderBoard.dll
 I:\GitHub\LeaderBoard\obj\Debug\net7.0\LeaderBoard.pdb
 I:\GitHub\LeaderBoard\obj\Debug\net7.0\LeaderBoard.genruntimeconfig.cache
 I:\GitHub\LeaderBoard\obj\Debug\net7.0\ref\LeaderBoard.dll
+I:\GitHub\LeaderBoard\bin\Debug\net7.0\MemoryPack.Core.dll
+I:\GitHub\LeaderBoard\obj\Debug\net7.0\LeaderBoard.csproj.AssemblyReference.cache
+I:\GitHub\LeaderBoard\obj\Debug\net7.0\LeaderBoard.csproj.CopyComplete
+I:\GitHub\LeaderBoard\bin\Debug\net7.0\xunit.abstractions.dll
+I:\GitHub\LeaderBoard\bin\Debug\net7.0\xunit.assert.dll
+I:\GitHub\LeaderBoard\bin\Debug\net7.0\xunit.core.dll
+I:\GitHub\LeaderBoard\bin\Debug\net7.0\xunit.execution.dotnet.dll

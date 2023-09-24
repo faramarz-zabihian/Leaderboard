@@ -11,4 +11,9 @@
     <Folder Include="Model\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MemoryPack" Version="1.9.16" />
+    <PackageReference Include="xunit" Version="2.5.1" />
+  </ItemGroup>
+
 </Project>

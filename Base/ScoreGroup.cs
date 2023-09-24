@@ -5,7 +5,7 @@ public class ScoreGroup
         this.Score = score;
     }
     public int Score { get; }
-    public List<Player> Players= new List<Player>();
+    public List<Player> Players = new();
     public int GroupCount;
     internal Player getDelegate()
     {

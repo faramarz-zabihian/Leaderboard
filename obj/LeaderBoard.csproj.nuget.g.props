@@ -13,4 +13,10 @@
     <SourceRoot Include="C:\Users\asus\.nuget\packages\" />
     <SourceRoot Include="C:\Program Files\dotnet\sdk\NuGetFallbackFolder\" />
   </ItemGroup>
+  <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)xunit.core\2.5.1\build\xunit.core.props" Condition="Exists('$(NuGetPackageRoot)xunit.core\2.5.1\build\xunit.core.props')" />
+  </ImportGroup>
+  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Pkgxunit_analyzers Condition=" '$(Pkgxunit_analyzers)' == '' ">C:\Users\asus\.nuget\packages\xunit.analyzers\1.3.0</Pkgxunit_analyzers>
+  </PropertyGroup>
 </Project>
