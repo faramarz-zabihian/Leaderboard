@@ -2,7 +2,7 @@
 {
     interface ICustomCollection
     {
-        ScoreGroup? Value(int  index);
+        ScoreGroup? Value(int index);
         int Count();
     }
 }

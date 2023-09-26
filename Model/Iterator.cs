@@ -1,10 +1,10 @@
 ﻿namespace LeaderBoard.Base
 {
-    interface Iterator<T>
+    public interface ITerator<T>
     {
         public abstract bool MoveForward();
         public abstract bool MoveBackward();
-        public abstract ScoreGroup? CurrentItem();     
+        public abstract ScoreGroup? CurrentItem();
     }
 }
 

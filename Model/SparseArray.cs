@@ -1,9 +1,5 @@
-﻿using System;
-using System.Reflection;
-using static System.Formats.Asn1.AsnWriter;
-
-namespace LeaderBoard.Base;
-class SparseArray : ICustomCollection
+﻿namespace LeaderBoard.Base;
+public class SparseArray : ICustomCollection
 {
     SortedList<int, ScoreGroup> items = new SortedList<int, ScoreGroup>();
     /*private int find_leftmost(int value)
@@ -21,15 +17,15 @@ class SparseArray : ICustomCollection
         }
         return L;
     }*/
-    
-    
+
+
     // Indexer
-    public Iterator<ScoreGroup> this[int score]
+    public ITerator<ScoreGroup> this[int score]
     {
         get
         {
             int index = items.IndexOfKey(score);
-            return index == -1 ? GetTraverser(-1) : GetTraverser(index);
+            return index == -1 ? GetIterator(-1) : GetIterator(index);
         }
     }
     public int Length
@@ -37,14 +33,14 @@ class SparseArray : ICustomCollection
         get { return items.Count; }
     }
 
-    public LeaderBoardIterartor GetTraverser()
+    public LeaderBoardIterartor GetIteraror()
     {
         return new LeaderBoardIterartor(this, -1);
     }
-    LeaderBoardIterartor GetTraverser(int index)
+    LeaderBoardIterartor GetIterator(int index)
     {
         return new LeaderBoardIterartor(this, index);
-    }    
+    }
 
     int ICustomCollection.Count()
     {
@@ -54,17 +50,17 @@ class SparseArray : ICustomCollection
     {
         return index < 0 || index >= items.Count ? null : items.GetValueAtIndex(index);
     }
-    
+
     internal LeaderBoardIterartor Add(int score, ScoreGroup value)
     {
         // Int32 index = items.IndexOfKey(score); // should find topest index before score and return an iterator
         items.Add(score, value);
-        return GetTraverser(items.IndexOfKey(score));
+        return GetIterator(items.IndexOfKey(score));
     }
     internal LeaderBoardIterartor Remove(int score)
     {
         int index = items.IndexOfKey(score);
         items.Remove(score);
-        return GetTraverser(index);
+        return GetIterator(index);
     }
 }

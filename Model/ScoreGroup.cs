@@ -7,7 +7,7 @@ public class ScoreGroup
     public int Score { get; }
     public List<Player> Players = new();
     public int GroupCount;
-    internal Player getDelegate()
+    public Player GetDelegate()
     {
         return Players[0];
     }

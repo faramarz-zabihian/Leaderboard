@@ -1,13 +1,11 @@
-﻿using System.Collections;
-
-namespace LeaderBoard.Base
+﻿namespace LeaderBoard.Base
 {
-    class LeaderBoardIterartor : Iterator<ScoreGroup>
+    public class LeaderBoardIterartor : ITerator<ScoreGroup>
     {
-        private ICustomCollection collection;
+        private readonly ICustomCollection collection;
         private int current = -1;
 
-        public LeaderBoardIterartor(ICustomCollection collection)
+        internal LeaderBoardIterartor(ICustomCollection collection)
         {
             this.collection = collection;
         }

@@ -1,8 +1,8 @@
 ﻿using MemoryPack;
 
 [MemoryPackable]
-partial class NotifyGroup
-{  
+public partial class NotifyGroup
+{
     public readonly List<Player> Players;
 
     [MemoryPackIgnore]
@@ -20,7 +20,7 @@ partial class NotifyGroup
 
     [MemoryPackConstructor]
     internal NotifyGroup(List<Player> players, string? LowerRankName, int? LowerRankScore, string? HighRankName, int? HighRankScore, int Score)
-    { 
+    {
         this.Players = players;
         this.LowerRankName = LowerRankName;
         this.LowerRankScore = LowerRankScore;
@@ -28,7 +28,7 @@ partial class NotifyGroup
         this.HighRankScore = HighRankScore;
         this.Score = Score;
     }
-    internal NotifyGroup(List<Player> players, string? LowerRankName, int? LowerRankScore, string? HighRankName, int? HighRankScore, int Score, DateTime dt): this(players, LowerRankName, LowerRankScore, HighRankName, HighRankScore, Score)
+    internal NotifyGroup(List<Player> players, string? LowerRankName, int? LowerRankScore, string? HighRankName, int? HighRankScore, int Score, DateTime dt) : this(players, LowerRankName, LowerRankScore, HighRankName, HighRankScore, Score)
     {
         FirstCreated = dt;
     }
