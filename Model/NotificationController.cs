@@ -1,4 +1,5 @@
 ﻿using MemoryPack;
+using System.Text.RegularExpressions;
 
 namespace LeaderBoard.Base
 {
@@ -7,6 +8,7 @@ namespace LeaderBoard.Base
         private int interval;
         private int by_groups = 0;
         private DateTime check_time;
+
         private int invokations = 0;
         public int Invokations { get; } = 0;
         private readonly SortedDictionary<int, NotifyGroup> groups = new();
@@ -25,33 +27,43 @@ namespace LeaderBoard.Base
             interval = millis;
             check_time = DateTime.Now.AddMilliseconds(interval);
         }
+        int n = 0;
         internal void Check()
         {
             if (DateTime.Now > check_time)
             {
-                var notify_array = groups.Values.ToArray();
-                var events = new List<NotifyGroup>();
-                foreach (var it in notify_array)
-                    if (it.FirstCreated < check_time)
-                    {
-                        groups.Remove(it.Score);
-                        events.Add(it);
-                        by_groups += it.Players.Count;
-                    }
-
-                if (events.Count > 0)
+                DateTime pick_time = check_time.AddMilliseconds(- interval);
+                var ts = check_time - pick_time;
+                var list = groups.Where(kv => kv.Value.FirstCreated < pick_time).Select(p => p.Value).ToList();
+                n++;
+                if (n == 2)
                 {
-                    invokations++;
-                    var bytes = MemoryPackSerializer.Serialize<List<NotifyGroup>>(events);
-                    var t = new Task(() => MemoryPackSerializer.Deserialize<List<NotifyGroup>>(bytes));
-                    t.Start();
-                    events.Clear();
+                    n = n;
+                }
+                if (list.Count > 0)
+                {                 
+                    var bytes = MemoryPackSerializer.Serialize<List<NotifyGroup>>(list);
+                    var t = new Task(() =>
+                                            {
+                                                // send as a stream of bytes to another server
+                                                // these lines are only for test
+                                                var readyToSend = MemoryPackSerializer.Deserialize<List<NotifyGroup>>(bytes);
+                                                invokations++;
+                                            }
+                                     );
+                    t.Start();                    
+                    list.ForEach(p =>
+                    {
+                        groups.Remove(p.Score);
+                        by_groups += p.Players.Count;
+                    });
                 }
                 check_time = DateTime.Now.AddMilliseconds(interval);
             }
         }
+
         public NotifyGroup[] GetList()
-        { 
+        {
             return groups.Values.ToArray();
         }
         internal void Add(int key, NotifyGroup notifyGroup)

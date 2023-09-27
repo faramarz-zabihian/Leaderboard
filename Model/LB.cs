@@ -6,7 +6,7 @@ public class LB
     private readonly SparseArray spa;
     private readonly Statistics stats;
     private readonly NotificationController notiController;
-    public LB(List<Player> list, NotificationController notiManager)
+    public LB(IList<Player> list, NotificationController notiManager)
     {
         spa = new();
         stats = new Statistics();
@@ -64,7 +64,7 @@ public class LB
         int ndx = g_old.Players.IndexOf(player); // note: SortedList or SortedDictionary are faster in this respect, but they are very slow on ToList()
         if (ndx >= 0) // else player is a newcomer
         {
-            g_old.Players.RemoveRange(ndx, 1);
+            g_old.Players.RemoveAt(ndx);
             g_old.GroupCount--;
             stats.
             removePlayers++;
@@ -127,6 +127,8 @@ public class LB
             // if the player is among an already being notified group, they can be ignored
             if (notiController.TryGetValue(new_score, out NotifyGroup? g))
             {
+                // for instance if scoregroup 40 has been perviously registered to be notified and this is a newcomer
+                // maybe group 40 is not a complete group and only some particular members are notified, let's check if player is among them
                 if (g!.Players.IndexOf(player) < 0)
                     g.Players.Add(player);
             }
