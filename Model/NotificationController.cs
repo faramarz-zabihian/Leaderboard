@@ -5,18 +5,15 @@ namespace LeaderBoard.Base
 {
     public class NotificationController
     {
-        private int interval;
-        private int by_groups = 0;
+        private readonly SortedDictionary<int, NotifyGroup> groups = new();
+        private readonly int interval;
         private DateTime check_time;
 
-        private int invokations = 0;
-        public int Invokations { get; } = 0;
-        private readonly SortedDictionary<int, NotifyGroup> groups = new();
-        private int singles = 0;
+        public int task_invokations = 0;
+        public int singlesCounter = 0;
+        public int groupedCounter = 0;
+        public int totalSent = 0;
 
-        public int SinglesItemsCount { get { return singles; } }
-        public int GroupedCount { get { return by_groups; } }
-        public int InvokesCount { get { return by_groups; } }
         internal bool TryGetValue(int key, out NotifyGroup? group)
         {
             return groups.TryGetValue(key, out group);
@@ -27,19 +24,11 @@ namespace LeaderBoard.Base
             interval = millis;
             check_time = DateTime.Now.AddMilliseconds(interval);
         }
-        int n = 0;
         internal void Check()
         {
             if (DateTime.Now > check_time)
             {
-                DateTime pick_time = check_time.AddMilliseconds(- interval);
-                var ts = check_time - pick_time;
-                var list = groups.Where(kv => kv.Value.FirstCreated < pick_time).Select(p => p.Value).ToList();
-                n++;
-                if (n == 2)
-                {
-                    n = n;
-                }
+                var list = groups.Where(kv => kv.Value.FirstCreated < check_time.AddMilliseconds(-interval)).Select(p => p.Value).ToList();
                 if (list.Count > 0)
                 {                 
                     var bytes = MemoryPackSerializer.Serialize<List<NotifyGroup>>(list);
@@ -47,16 +36,15 @@ namespace LeaderBoard.Base
                                             {
                                                 // send as a stream of bytes to another server
                                                 // these lines are only for test
-                                                var readyToSend = MemoryPackSerializer.Deserialize<List<NotifyGroup>>(bytes);
-                                                invokations++;
+                                     //           var readyToSend = MemoryPackSerializer.Deserialize<List<NotifyGroup>>(bytes);
+                                                task_invokations++;
                                             }
                                      );
-                    t.Start();                    
-                    list.ForEach(p =>
-                    {
-                        groups.Remove(p.Score);
-                        by_groups += p.Players.Count;
-                    });
+                    t.Start();
+                    list.ForEach(p => { 
+                        groups.Remove(p.Score); 
+                        totalSent += p.Players.Count; 
+                    });                    
                 }
                 check_time = DateTime.Now.AddMilliseconds(interval);
             }
@@ -69,17 +57,11 @@ namespace LeaderBoard.Base
         internal void Add(int key, NotifyGroup notifyGroup)
         {
             groups.Add(key, notifyGroup);
-            singles++;
         }
 
         internal bool Remove(int score)
         {
             return groups.Remove(score);
-        }
-
-        internal void AddSinglesCounter()
-        {
-            singles++;
         }
     }
 }

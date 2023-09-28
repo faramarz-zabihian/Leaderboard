@@ -33,13 +33,13 @@ public class SparseArray : ICustomCollection
         get { return items.Count; }
     }
 
-    public LeaderBoardIterartor GetIteraror()
+    public LeaderBoardIterator GetIteraror()
     {
-        return new LeaderBoardIterartor(this, -1);
+        return new LeaderBoardIterator(this, -1);
     }
-    LeaderBoardIterartor GetIterator(int index)
+    LeaderBoardIterator GetIterator(int index)
     {
-        return new LeaderBoardIterartor(this, index);
+        return new LeaderBoardIterator(this, index);
     }
 
     int ICustomCollection.Count()
@@ -51,13 +51,13 @@ public class SparseArray : ICustomCollection
         return index < 0 || index >= items.Count ? null : items.GetValueAtIndex(index);
     }
 
-    internal LeaderBoardIterartor Add(int score, ScoreGroup value)
+    internal LeaderBoardIterator Add(int score, ScoreGroup value)
     {
         // Int32 index = items.IndexOfKey(score); // should find topest index before score and return an iterator
         items.Add(score, value);
         return GetIterator(items.IndexOfKey(score));
     }
-    internal LeaderBoardIterartor Remove(int score)
+    internal LeaderBoardIterator Remove(int score)
     {
         int index = items.IndexOfKey(score);
         items.Remove(score);

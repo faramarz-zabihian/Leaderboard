@@ -1,15 +1,19 @@
 ﻿namespace LeaderBoard.Base
 {
-    public class LeaderBoardIterartor : ITerator<ScoreGroup>
+    public class LeaderBoardIterator : ITerator<ScoreGroup>
     {
         private readonly ICustomCollection collection;
         private int current = -1;
 
-        internal LeaderBoardIterartor(ICustomCollection collection)
+        internal LeaderBoardIterator(ICustomCollection collection)
         {
             this.collection = collection;
         }
-        internal LeaderBoardIterartor(ICustomCollection collection, int index) : this(collection)
+        internal LeaderBoardIterator clone()
+        {
+            return new LeaderBoardIterator(collection, current);
+        }
+        internal LeaderBoardIterator(ICustomCollection collection, int index) : this(collection)
         {
             if (index < collection.Count() && index >= 0)
                 current = index;
@@ -22,7 +26,7 @@
             if (current < collection.Count())
                 return true;
 
-            current = collection.Count();
+            current = collection.Count(); // one past the collection
             return false;
         }
         public bool MoveBackward()
@@ -39,6 +43,12 @@
         public ScoreGroup? CurrentItem()
         {
             return collection.Value(current);
+        }
+
+        public bool Last()
+        {
+            current = collection.Count() - 1;
+            return current > 0;
         }
     }
 }
