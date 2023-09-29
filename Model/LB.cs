@@ -4,40 +4,79 @@ namespace LeaderBoard
 {
     public class LB
     {
+        private readonly List<Player> offLinePlayers = new();
+        private readonly Dictionary<int, int> onDemandScores = new();
         private readonly SparseArray spa;
         private readonly Statistics stats;
         private readonly NotificationController notiController;
+
         public SparseArray GetArray() => spa;
         public Statistics Stats { get => stats; }
 
         public LB(IList<Player> list, NotificationController notiManager)
         {
             spa = new();
-            stats = new Statistics();
-            this.notiController = notiManager;
-
-            Player player;
             ScoreGroup? sg;
             for (int i = 0; i < list.Count; i++)
             {
-                player = list[i];
+                var player = list[i];
                 sg = spa[player.Score]?.CurrentItem();
                 if (sg == null)
                 {
                     sg = new ScoreGroup(player.Score) { GroupCount = 1 };
-                    sg.Players.Add(player);
+                    sg.Players.Add(player.Id, player);
                     spa.Add(sg.Score, sg);
                 }
                 else
                 {
-                    sg.Players.Add(player);
+                    sg.Players.Add(player.Id, player);
                     sg.GroupCount++;
                 }
             }
         }
+        void ask_for_actual_delegate(int score)
+        {
+            Stats.DBCalls++;
+            Task.Run(async () =>
+            {
+                DB.getSamplePlayer(score, (p) =>
+                {
+                    lock (offLinePlayers)
+                    {
+                        offLinePlayers.Add(p);
+                        Stats.DBResponses++;
+                    }
+                });
+            });
+        }
 
+        void CheckForVirtualGroups()
+        {
+
+            if (offLinePlayers.Count() > 0)
+            {
+                // remove Virtual players from the scoreGroups
+                lock (offLinePlayers)
+                {
+                    while (offLinePlayers.Count() > 0)
+                    {
+                        Player p = offLinePlayers[0];
+                        int score = p.Score;
+                        var sg = spa[score].CurrentItem();
+                        if (sg != null && sg.HasVitualUser) // 
+                        {
+                            sg.Players.Remove(-1);
+                            sg.Players.Add(p.Id, p);
+                            sg.HasVitualUser = false;
+                        }
+                        offLinePlayers.RemoveAll(p => p.Score == score);
+                    }
+                }
+            }
+        }
         public void Push(Player player, int new_score)
         {
+            CheckForVirtualGroups();
             Stats.pushes++;
             int old_score = player.Score;
             player.Score = new_score; // for the next time
@@ -45,29 +84,45 @@ namespace LeaderBoard
             if (new_score <= old_score)
                 return;
 
-            var it_old_score = spa[old_score];
+            var it_old_score = (LeaderBoardIterator)spa[old_score];
             if (it_old_score.CurrentItem() == null) // non existent score
                 return;
 
             // a binary search on 10000 element array needs 2^15 checks, while new_score resides in 2 or 3 indexed higher
-            /*int nCounter = 0;
-            while (it_old_score.CurrentItem().Score < new_score)
-            {
-                it_old_score.MoveForward();
-                nCounter++;
-            }*/
+            /*
+                        ITerator<ScoreGroup>? it_new_score = (it_old_score as LeaderBoardIterator).clone();
+                        ScoreGroup? g_new_score = null;
+
+                        while ( (g_new_score = it_new_score.CurrentItem()) != null && g_new_score.Score < new_score)
+                            it_new_score.MoveForward();
+
+                        var tt = spa[new_score];
+                        if (tt.CurrentItem() != it_new_score.CurrentItem())
+                        {
+                            tt = null;
+                        }
+                        //it_new_score = spa[new_score] as LeaderBoardIterator;
+
+                        if ( (g_new_score?.Score??-1) != new_score) // not found
+                        {
+                            g_new_score = null;
+                            it_new_score = null;
+                        }
+            */
 
             var it_new_score = spa[new_score];
-            var g_new_score = it_new_score.CurrentItem(); if (g_new_score == null) it_new_score = null; // unnecessary
+            var g_new_score = it_new_score.CurrentItem();
+            if (g_new_score == null)
+                it_new_score = null; // unnecessary
 
             ScoreGroup g_old = it_old_score.CurrentItem()!;
             var dp_old_score = g_old.GetDelegate();
 
-
-            int ndx = g_old.Players.IndexOf(player); // note: SortedList or SortedDictionary are faster in this respect, but they are very slow on ToList()
+            int ndx = g_old.Players.IndexOfKey(player.Id);
             if (ndx >= 0) // else player is a newcomer
             {
-                g_old.Players.RemoveAt(ndx);
+                g_old.Players.Remove(player.Id);
+                //g_old.Players.RemoveAt(ndx);
                 g_old.GroupCount--;
             }
 
@@ -83,20 +138,33 @@ namespace LeaderBoard
                 stats.removedGroups++;
             }
             else if (g_old.Players.Count == 0) // group count is bigger than zero
-                g_old.Players.Add(GetOffLinePlayer(g_old.Score));
+            {
+                // approach 1: simple and at some situations even efficient
+                // Player p = DB.getSamplePlayer(g_old.Score).Result;
+                // g_old.Players.Add(g_old.Score, p);
+
+                if (!g_old.HasVitualUser) //approach 2:
+                {
+                    // this virtual user must be replace as soon as possible, and the groups containing this user should wait to be notified
+                    g_old.Players.Add(-1, new() { Id = -1, Score = g_old.Score, Name = $"User({g_old.Score}) Place Holder" });
+                    g_old.HasVitualUser = true;
+                    ask_for_actual_delegate(g_old.Score);
+                }
+            }
 
             if (g_new_score == null) // the group does not exist, and must be created        
             {
                 ScoreGroup sg = new(new_score) { GroupCount = 1 };
-                sg.Players.Add(player);
+                sg.Players.Add(player.Id, player);
                 it_new_score = spa.Add(new_score, sg);
                 stats.createdGroups++;
             }
             else
             {
                 g_new_score.GroupCount++;
-                g_new_score.Players.Add(player);
+                g_new_score.Players.Add(player.Id, player);
             }
+
             // list of score groups that must be notified 
             // p2, p1, c, n1, n2
 
@@ -129,8 +197,8 @@ namespace LeaderBoard
                 {
                     // for instance if scoregroup 40 has been perviously registered to be notified and this is a newcomer
                     // maybe group 40 is not a complete group and only some particular members are notified, let's check if player is among them
-                    if (g!.Players.IndexOf(player) < 0)
-                        g.Players.Add(player);
+                    if (g!.Players.IndexOfKey(player.Id) < 0)
+                        g.Players.Add(player.Id, player);
                 }
                 else // must create a single notification for the player
                 {
@@ -141,7 +209,7 @@ namespace LeaderBoard
                     it_new_score.MoveForward();
                     var n1 = new { it_new_score.CurrentItem()?.GetDelegate().Name, it_new_score.CurrentItem()?.Score };
                     it_new_score.MoveBackward();
-                    notiController.Add(new_score, new NotifyGroup(new List<Player> { player }, p1.Name, p1?.Score, n1.Name, n1.Score, new_score));
+                    notiController.Add(new_score, new NotifyGroup(new SortedList<int, Player> { { player.Id, player } }, p1.Name, p1?.Score, n1.Name, n1.Score, new_score));
                     notiController.singlesCounter++;
                 }
             }
@@ -162,22 +230,15 @@ namespace LeaderBoard
                     it_old_score.MoveForward(); Add_to_notification_list(it_old_score);
                 }
             }
-            // now must sum up notificatios and pass them to another task every 5 millis
+            // now must sum up notificatios and pass them to another task every 5 seconds
             notiController.Check();
         }
 
         private Player GetOffLinePlayer(int score)
         {
+            ask_for_actual_delegate(score);
             // wherever this player is involded, its operations must be delayed
-            Player player = new() { Id = -1, Fake = true, Score = score };
-            Task.Run(async () =>
-            {
-                var p = await DB.getPlayerName(score);
-                player.Id = p.Id;
-                player.Name = p.Name;
-                player.Fake = false;
-                // Notifier can wait until Fake has been reset
-            });
+            Player player = new() { Id = -1, Score = score };
             return player;
 
         }

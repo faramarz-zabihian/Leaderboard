@@ -3,11 +3,11 @@ using MemoryPack;
 [MemoryPackable]
 public partial class Player
 {
-    public int Id;
-    public string SId = "";
     public string Name = "";
     [MemoryPackIgnore]
-    public Int32 Score;
+    public int Id;
     [MemoryPackIgnore]
-    public bool Fake = false;
+    public string SId = "";
+    [MemoryPackIgnore]
+    public Int32 Score;
 }

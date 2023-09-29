@@ -1,5 +1,4 @@
 ﻿using MemoryPack;
-using System.Text.RegularExpressions;
 
 namespace LeaderBoard.Base
 {
@@ -30,21 +29,22 @@ namespace LeaderBoard.Base
             {
                 var list = groups.Where(kv => kv.Value.FirstCreated < check_time.AddMilliseconds(-interval)).Select(p => p.Value).ToList();
                 if (list.Count > 0)
-                {                 
+                {
                     var bytes = MemoryPackSerializer.Serialize<List<NotifyGroup>>(list);
                     var t = new Task(() =>
                                             {
                                                 // send as a stream of bytes to another server
                                                 // these lines are only for test
-                                     //           var readyToSend = MemoryPackSerializer.Deserialize<List<NotifyGroup>>(bytes);
+                                                //var readyToSend = MemoryPackSerializer.Deserialize<List<NotifyGroup>>(bytes);
                                                 task_invokations++;
                                             }
                                      );
                     t.Start();
-                    list.ForEach(p => { 
-                        groups.Remove(p.Score); 
-                        totalSent += p.Players.Count; 
-                    });                    
+                    list.ForEach(p =>
+                    {
+                        groups.Remove(p.Score);
+                        totalSent += p.Players.Count;
+                    });
                 }
                 check_time = DateTime.Now.AddMilliseconds(interval);
             }

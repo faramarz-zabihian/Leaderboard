@@ -1,15 +1,10 @@
 ﻿using LeaderBoard.Base;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MemoryPack;
 
 
 namespace LeaderBoard.Utility
 {
-    public class Runner: ILogger
+    public class Runner : ILogger
     {
 
         private readonly NotificationController noti;
@@ -19,7 +14,7 @@ namespace LeaderBoard.Utility
 
         public Runner(int scoreRange, int topScorePerPlay, int onLinePlayersCount, int reportInterval, ILogger logger)
         {
-            Random rndScore = new(1000);            
+            Random rndScore = new(1000);
             TopScorePerPlay = topScorePerPlay;
 
             this.logger = logger ?? this;
@@ -32,7 +27,23 @@ namespace LeaderBoard.Utility
                 players.Add(player);
             }
             lb = new(players, noti);
-            players.Clear();
+
+
+            var s1 = DateTime.Now;
+            MemoryPackSerializer.Serialize<List<Player>>(players);
+            var e1 = DateTime.Now;
+            var sd = new SortedDictionary<int, Player>();
+            for (int i = 0; i < players.Count; i++)
+            {
+                sd.Add(players[i].Id, players[i]);
+            }
+            /*            var s2 = DateTime.Now;
+                        MemoryPackSerializer.Serialize<Player[]>(sd.Values.ToArray());
+                        var e2 = DateTime.Now;
+                        players.Clear();
+                        Console.WriteLine(e1 - s1);
+                        Console.WriteLine(e2 - s2);
+            */
         }
         DateTime start;
         public void Perform(int numSeconds)
@@ -44,26 +55,33 @@ namespace LeaderBoard.Utility
             it.Last();
             var toppestScore = it.CurrentItem()!.Score;
             lb.Stats.startSize = lb.GetArray().Length;
-            while (DateTime.Now < start)
+            int j = 0;
+            //while (DateTime.Now < start)
+            DateTime s1 = DateTime.Now;
+            while (j++ < 6000000)
             {
                 // extract a random player and push
                 var sg = lb.GetGroup(rndScore.Next(toppestScore));
                 if (sg == null)
+                {
+                    --j; // guarantee the number of pushes
                     continue;
-                var player = sg.Players[rndPlayer.Next(sg.Players.Count)];
+                }
+                var player = sg.Players.GetValueAtIndex(rndPlayer.Next(sg.Players.Count));
                 lb.Push(player, player.Score + rndScore.Next(TopScorePerPlay) + 1); // re rank the player                
             }
+            DateTime e1 = DateTime.Now;
             Task.WaitAll();
-            lb.Stats.millis = numSeconds;
+            lb.Stats.seconds = (e1 - s1).Seconds;
             lb.Stats.endSize = lb.GetArray().Length;
             lb.Stats.TPS = lb.Stats.pushes / numSeconds;
-            logger.Log(lb, noti);            
+            logger.Log(lb, noti);
         }
         public void Log(LB lb, NotificationController nc)
         {
             Console.WriteLine("-----------------------------------------");
-            Console.WriteLine($"Seconds             : {lb.Stats.millis,7}");            
-            Console.WriteLine($"TPS                      : {lb.Stats.TPS,7}");
+            Console.WriteLine($"Seconds                  : {lb.Stats.seconds,7}");
+            Console.WriteLine($"Pushes                   : {lb.Stats.pushes,7}");
             Console.WriteLine($"Groups created           : {lb.Stats.createdGroups,7}");
             Console.WriteLine($"Groups removed           : {lb.Stats.removedGroups,7}");
             Console.WriteLine($"TPS                      : {lb.Stats.TPS,7}");

@@ -1,14 +1,16 @@
+
 public class ScoreGroup
 {
+    internal bool HasVitualUser = false;
     public ScoreGroup(int score)
     {
         this.Score = score;
     }
     public int Score { get; }
-    public List<Player> Players = new();
+    public SortedList<int, Player> Players = new();
     public int GroupCount;
     public Player GetDelegate()
     {
-        return Players[0];
+        return Players.GetValueAtIndex(0);
     }
 }

@@ -3,7 +3,7 @@
 [MemoryPackable]
 public partial class NotifyGroup
 {
-    public readonly List<Player> Players;
+    public readonly SortedList<int, Player> Players;
 
     [MemoryPackIgnore]
     public readonly DateTime FirstCreated;
@@ -19,7 +19,7 @@ public partial class NotifyGroup
     private readonly int? HighRankScore = null;
 
     [MemoryPackConstructor]
-    internal NotifyGroup(List<Player> players, string? LowerRankName, int? LowerRankScore, string? HighRankName, int? HighRankScore, int Score)
+    internal NotifyGroup(SortedList<int, Player> players, string? LowerRankName, int? LowerRankScore, string? HighRankName, int? HighRankScore, int Score)
     {
         this.Players = players;
         this.LowerRankName = LowerRankName;
@@ -28,7 +28,7 @@ public partial class NotifyGroup
         this.HighRankScore = HighRankScore;
         this.Score = Score;
     }
-    internal NotifyGroup(List<Player> players, string? LowerRankName, int? LowerRankScore, string? HighRankName, int? HighRankScore, int Score, DateTime dt) : this(players, LowerRankName, LowerRankScore, HighRankName, HighRankScore, Score)
+    internal NotifyGroup(SortedList<int, Player> players, string? LowerRankName, int? LowerRankScore, string? HighRankName, int? HighRankScore, int Score, DateTime dt) : this(players, LowerRankName, LowerRankScore, HighRankName, HighRankScore, Score)
     {
         FirstCreated = dt;
     }
