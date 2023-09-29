@@ -42,7 +42,7 @@ Any score event causes a player to move to either a pre-existing group or a new 
 
 **Steps:**
 
-1. Lookup the last score, remove player from that groupin utility d
+1. Lookup the last score, remove player from that group.
 2. Lookup the new score, or create a new one, and add the player
 3. Look for the score groups that must be notified
 
