@@ -2,7 +2,7 @@
 
 Leaderboard assumptions:
 
-- Al players with the same score share the same rank.
+- Players with the same score share the same rank.
 - There is no limit of total scores and lowest rank.
 - There is no negative score.
 
