@@ -13,30 +13,30 @@ namespace LeaderBoard
         public SparseArray GetArray() => spa;
         public Statistics Stats { get => stats; }
 
-        public LB(IList<Player> list, NotificationController notiManager)
+        public LB(IList<Player> list, NotificationController notif)
         {
             spa = new();
+            stats = new();
+            notiController = notif;
             ScoreGroup? sg;
+
             for (int i = 0; i < list.Count; i++)
             {
                 var player = list[i];
                 sg = spa[player.Score]?.CurrentItem();
                 if (sg == null)
                 {
-                    sg = new ScoreGroup(player.Score) { GroupCount = 1 };
-                    sg.Players.Add(player.Id, player);
+                    sg = new ScoreGroup(player.Score);
                     spa.Add(sg.Score, sg);
                 }
-                else
-                {
-                    sg.Players.Add(player.Id, player);
-                    sg.GroupCount++;
-                }
+
+                sg.Players.Add(player.Id, player);
+                sg.GroupCount++;
             }
         }
         void ask_for_actual_delegate(int score)
-        {
-            Stats.DBCalls++;
+        {         
+            stats.DBCalls++;
             Task.Run(async () =>
             {
                 DB.getSamplePlayer(score, (p) =>
@@ -44,7 +44,7 @@ namespace LeaderBoard
                     lock (offLinePlayers)
                     {
                         offLinePlayers.Add(p);
-                        Stats.DBResponses++;
+                        stats.DBResponses++;
                     }
                 });
             });
@@ -76,8 +76,8 @@ namespace LeaderBoard
         }
         public void Push(Player player, int new_score)
         {
-            CheckForVirtualGroups();
-            Stats.pushes++;
+            //CheckForVirtualGroups();
+            stats.pushes++;
             int old_score = player.Score;
             player.Score = new_score; // for the next time
 

@@ -37,13 +37,6 @@ namespace LeaderBoard.Utility
             {
                 sd.Add(players[i].Id, players[i]);
             }
-            /*            var s2 = DateTime.Now;
-                        MemoryPackSerializer.Serialize<Player[]>(sd.Values.ToArray());
-                        var e2 = DateTime.Now;
-                        players.Clear();
-                        Console.WriteLine(e1 - s1);
-                        Console.WriteLine(e2 - s2);
-            */
         }
         DateTime start;
         public void Perform(int numSeconds)
