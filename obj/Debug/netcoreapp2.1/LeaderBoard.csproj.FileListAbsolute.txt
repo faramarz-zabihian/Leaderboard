@@ -1,5 +1,0 @@
-I:\GitHub\LeaderBoard\obj\Debug\netcoreapp2.1\LeaderBoard.csproj.AssemblyReference.cache
-I:\GitHub\LeaderBoard\obj\Debug\netcoreapp2.1\LeaderBoard.GeneratedMSBuildEditorConfig.editorconfig
-I:\GitHub\LeaderBoard\obj\Debug\netcoreapp2.1\LeaderBoard.AssemblyInfoInputs.cache
-I:\GitHub\LeaderBoard\obj\Debug\netcoreapp2.1\LeaderBoard.AssemblyInfo.cs
-I:\GitHub\LeaderBoard\obj\Debug\netcoreapp2.1\LeaderBoard.csproj.CoreCompileInputs.cache
