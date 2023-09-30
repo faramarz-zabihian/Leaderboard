@@ -84,34 +84,27 @@ namespace LeaderBoard
             if (new_score <= old_score)
                 return;
 
-            var it_old_score = (LeaderBoardIterator)spa[old_score];
+            var it_old_score = spa[old_score];
             if (it_old_score.CurrentItem() == null) // non existent score
                 return;
-
-            // a binary search on 10000 element array needs 2^15 checks, while new_score resides in 2 or 3 indexed higher
+            
+            ScoreGroup? g_new_score = null;
             /*
-                        ITerator<ScoreGroup>? it_new_score = (it_old_score as LeaderBoardIterator).clone();
-                        ScoreGroup? g_new_score = null;
+            // a binary search on 10000 element array needs 2^15 checks, while new_score resides in 2 or 3 indexed higher
 
-                        while ( (g_new_score = it_new_score.CurrentItem()) != null && g_new_score.Score < new_score)
-                            it_new_score.MoveForward();
+            ITerator<ScoreGroup>? it_new_score = (it_old_score as LeaderBoardIterator).clone();
+            while ((g_new_score = it_new_score.CurrentItem()) != null && g_new_score.Score < new_score)
+                it_new_score.MoveForward();            
 
-                        var tt = spa[new_score];
-                        if (tt.CurrentItem() != it_new_score.CurrentItem())
-                        {
-                            tt = null;
-                        }
-                        //it_new_score = spa[new_score] as LeaderBoardIterator;
-
-                        if ( (g_new_score?.Score??-1) != new_score) // not found
-                        {
-                            g_new_score = null;
-                            it_new_score = null;
-                        }
+            if ((g_new_score?.Score?? -1) != new_score) // not found
+            {
+                g_new_score = null;
+                it_new_score = null;
+            }
             */
 
             var it_new_score = spa[new_score];
-            var g_new_score = it_new_score.CurrentItem();
+            g_new_score = it_new_score.CurrentItem();
             if (g_new_score == null)
                 it_new_score = null; // unnecessary
 
@@ -230,7 +223,7 @@ namespace LeaderBoard
                     it_old_score.MoveForward(); Add_to_notification_list(it_old_score);
                 }
             }
-            // now must sum up notificatios and pass them to another task every 5 seconds
+            // now must sum up notificatios and pass them to another task every 5 duration
             notiController.Check();
         }
 

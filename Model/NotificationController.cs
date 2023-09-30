@@ -33,6 +33,7 @@ namespace LeaderBoard.Base
                     var bytes = MemoryPackSerializer.Serialize<List<NotifyGroup>>(list);
                     var t = new Task(() =>
                                             {
+                                                //Console.WriteLine(bytes.Length);
                                                 // send as a stream of bytes to another server
                                                 // these lines are only for test
                                                 //var readyToSend = MemoryPackSerializer.Deserialize<List<NotifyGroup>>(bytes);

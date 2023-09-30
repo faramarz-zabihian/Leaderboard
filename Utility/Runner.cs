@@ -65,15 +65,15 @@ namespace LeaderBoard.Utility
             }
             DateTime e1 = DateTime.Now;
             Task.WaitAll();
-            lb.Stats.seconds = (e1 - s1).Seconds;
+            lb.Stats.duration = (e1 - s1).TotalMilliseconds/1000;
             lb.Stats.endSize = lb.GetArray().Length;
-            lb.Stats.TPS = lb.Stats.pushes / numSeconds;
+            lb.Stats.TPS = (int) (lb.Stats.pushes / lb.Stats.duration);
             logger.Log(lb, noti);
         }
         public void Log(LB lb, NotificationController nc)
         {
             Console.WriteLine("-----------------------------------------");
-            Console.WriteLine($"Seconds                  : {lb.Stats.seconds,7}");
+            Console.WriteLine($"Seconds                  : {lb.Stats.duration,7:###.##}");
             Console.WriteLine($"Pushes                   : {lb.Stats.pushes,7}");
             Console.WriteLine($"Groups created           : {lb.Stats.createdGroups,7}");
             Console.WriteLine($"Groups removed           : {lb.Stats.removedGroups,7}");
@@ -83,7 +83,7 @@ namespace LeaderBoard.Utility
             Console.WriteLine(".........................................");
             Console.WriteLine($"Single item notes        : {noti.singlesCounter,7}");
             Console.WriteLine($"Grouped notes            : {noti.groupedCounter,7}");
-            Console.WriteLine($"Total Notes              : {noti.totalSent,7}");
+            Console.WriteLine($"Sent                     : {noti.totalSent,7}");
             Console.WriteLine($"Task invokations         : {noti.task_invokations,7}");
             if (noti.task_invokations > 0)
                 Console.WriteLine($"Average per task invoks  : {noti.totalSent / noti.task_invokations,7}");

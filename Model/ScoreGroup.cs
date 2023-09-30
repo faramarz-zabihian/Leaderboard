@@ -7,6 +7,7 @@ public class ScoreGroup
         this.Score = score;
     }
     public int Score { get; }
+    public int Rank { get; }
     public SortedList<int, Player> Players = new();
     public int GroupCount;
     public Player GetDelegate()
