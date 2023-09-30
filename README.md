@@ -3,6 +3,9 @@ An in memory Leaderboard implementation
 
 LB: contains library classes
 
-TestCases: test cases to verify programs behavior
+TestCases: contains test cases to verify programs behavior
+
+RunLeaderBoard: a sample application 
+
 
 
