@@ -1,7 +1,7 @@
 
 public class ScoreGroup
 {
-    internal bool HasVitualUser = false;
+    internal bool HasVirtualUser = false;
     public ScoreGroup(int score)
     {
         this.Score = score;

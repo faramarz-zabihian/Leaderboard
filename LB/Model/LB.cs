@@ -1,4 +1,6 @@
 ﻿using LeaderBoard.Base;
+using System;
+using System.Collections.Generic;
 
 namespace LeaderBoard
 {
@@ -35,7 +37,7 @@ namespace LeaderBoard
             }
         }
         void ask_for_actual_delegate(int score)
-        {         
+        {
             stats.DBCalls++;
             Task.Run(async () =>
             {
@@ -55,7 +57,7 @@ namespace LeaderBoard
 
             if (offLinePlayers.Count() > 0)
             {
-                // remove Virtual players from the scoreGroups
+                // replace virtual players with real users
                 lock (offLinePlayers)
                 {
                     while (offLinePlayers.Count() > 0)
@@ -63,71 +65,56 @@ namespace LeaderBoard
                         Player p = offLinePlayers[0];
                         int score = p.Score;
                         var sg = spa[score].CurrentItem();
-                        if (sg != null && sg.HasVitualUser) // 
+                        // the group may have been abandoned when an offline player gets inline while their data is being feteched from DB
+                        if (sg != null && sg.HasVirtualUser)
                         {
+                            // remove Virtual players from the scoreGroups
                             sg.Players.Remove(-1);
                             sg.Players.Add(p.Id, p);
-                            sg.HasVitualUser = false;
+                            sg.HasVirtualUser = false;
                         }
                         offLinePlayers.RemoveAll(p => p.Score == score);
+
                     }
                 }
             }
         }
         public void Push(Player player, int new_score)
         {
-            //CheckForVirtualGroups();
+            CheckForVirtualGroups();
             stats.pushes++;
             int old_score = player.Score;
             player.Score = new_score; // for the next time
 
-            if (new_score <= old_score)
+            if (new_score <= old_score || player.Id < 0) // check against invalid data
                 return;
 
             var it_old_score = spa[old_score];
             if (it_old_score.CurrentItem() == null) // non existent score
                 return;
-            
+
             ScoreGroup? g_new_score = null;
-            /*
-            // a binary search on 10000 element array needs 2^15 checks, while new_score resides in 2 or 3 indexed higher
-
-            ITerator<ScoreGroup>? it_new_score = (it_old_score as LeaderBoardIterator).clone();
-            while ((g_new_score = it_new_score.CurrentItem()) != null && g_new_score.Score < new_score)
-                it_new_score.MoveForward();            
-
-            if ((g_new_score?.Score?? -1) != new_score) // not found
-            {
-                g_new_score = null;
-                it_new_score = null;
-            }
-            */
 
             var it_new_score = spa[new_score];
             g_new_score = it_new_score.CurrentItem();
-            if (g_new_score == null)
-                it_new_score = null; // unnecessary
+            if (g_new_score == null) // unnecessary check
+                it_new_score = null;
 
             ScoreGroup g_old = it_old_score.CurrentItem()!;
             var dp_old_score = g_old.GetDelegate();
 
-            int ndx = g_old.Players.IndexOfKey(player.Id);
-            if (ndx >= 0) // else player is a newcomer
-            {
-                g_old.Players.Remove(player.Id);
-                //g_old.Players.RemoveAt(ndx);
+            if (g_old.Players.Remove(player.Id))
                 g_old.GroupCount--;
-            }
 
             ITerator<ScoreGroup>? removed_group_top_neighbor = null;
-            bool oldRemoved = false;
+            bool groupAbandoned = false;
 
             if (g_old.GroupCount == 0) // the group must be removed
             {
                 notiController.Remove(old_score);
                 removed_group_top_neighbor = spa.Remove(old_score); // removes score, and gets nearest higher rank
                 it_old_score = null;                                // make sure it's not accidentally used
-                oldRemoved = true;
+                groupAbandoned = true;
                 stats.removedGroups++;
             }
             else if (g_old.Players.Count == 0) // group count is bigger than zero
@@ -136,11 +123,11 @@ namespace LeaderBoard
                 // Player p = DB.getSamplePlayer(g_old.Score).Result;
                 // g_old.Players.Add(g_old.Score, p);
 
-                if (!g_old.HasVitualUser) //approach 2:
+                if (!g_old.HasVirtualUser) //approach 2:
                 {
                     // this virtual user must be replace as soon as possible, and the groups containing this user should wait to be notified
                     g_old.Players.Add(-1, new() { Id = -1, Score = g_old.Score, Name = $"User({g_old.Score}) Place Holder" });
-                    g_old.HasVitualUser = true;
+                    g_old.HasVirtualUser = true;
                     ask_for_actual_delegate(g_old.Score);
                 }
             }
@@ -156,17 +143,22 @@ namespace LeaderBoard
             {
                 g_new_score.GroupCount++;
                 g_new_score.Players.Add(player.Id, player);
+                if (g_new_score.HasVirtualUser)
+                {
+                    g_new_score.Players.Remove(-1);
+                    g_new_score.HasVirtualUser = false;
+                }
             }
 
             // list of score groups that must be notified 
-            // p2, p1, c, n1, n2
-
-            // if group c is going to be notified then p1 and n1 must be traversed for their delegates
-            // (1)- if c removed then n1 becomes current, p1 and n1 must be notified
+            // p2, p1, c(left player), n1, n2, n?(arrived player)
+            // if c is going to be notified then p1 and n1 must be traversed for their delegates
+            // cases:
+            // (1)- if c removed p1 and n1 (now c) must be notified
             // (2)- if c is inserted p2 p1 c n1 n2, p2 then n1 and p1 are going to be notified
             // (3)- if a player from c1 moves to n? and the player is the delegate of c, then p1, n1 must be notified
             // (4)- if a player relocates from c  to n?, the player must be notified
-            // (5)- if the plyaer has simply changed its group, he/she is the one to be notified
+            // (5)- if a new group has not been created and the old group has been removed, all groups below old group should be notified.
 
             bool must_notify_player = true; // case 4 : the player must be notofied
             if (g_new_score == null) // case 2: The entering group is new, its new neighbors are definitly affected
@@ -183,7 +175,7 @@ namespace LeaderBoard
                 Add_to_notification_list(it_new_score); // c            
             }
 
-            if (must_notify_player)
+            if (must_notify_player) // case 4
             {
                 // if the player is among an already being notified group, they can be ignored
                 if (notiController.TryGetValue(new_score, out NotifyGroup? g))
@@ -207,13 +199,13 @@ namespace LeaderBoard
                 }
             }
 
-            if (oldRemoved) // case 1: n1, p1 should be notified
+            if (groupAbandoned) // case 1: n1, p1 should be notified
             {
-                Add_to_notification_list(removed_group_top_neighbor!); // n1
+                Add_to_notification_list(removed_group_top_neighbor!); // old n1, now c
                 removed_group_top_neighbor!.MoveBackward();
                 Add_to_notification_list(removed_group_top_neighbor);  // p1
             }
-            else
+            else // case 3
             {
                 // wondering if the left user have been the representative of its owen group, then p1, n1 must be notified
                 if (dp_old_score.Id == player.Id) // should check if the moving player has represented his old group or not
@@ -223,17 +215,8 @@ namespace LeaderBoard
                     it_old_score.MoveForward(); Add_to_notification_list(it_old_score);
                 }
             }
-            // now must sum up notificatios and pass them to another task every 5 duration
+            // send notifications
             notiController.Check();
-        }
-
-        private Player GetOffLinePlayer(int score)
-        {
-            ask_for_actual_delegate(score);
-            // wherever this player is involded, its operations must be delayed
-            Player player = new() { Id = -1, Score = score };
-            return player;
-
         }
 
         // used only to add groups of players
@@ -252,8 +235,16 @@ namespace LeaderBoard
             else
                 dt = DateTime.Now;
 
-            iter.MoveForward(); var _next = new { iter.CurrentItem()?.GetDelegate().Name, iter.CurrentItem()?.Score }; iter.MoveBackward();
-            iter.MoveBackward(); var _prev = new { iter.CurrentItem()?.GetDelegate().Name, iter.CurrentItem()?.Score }; iter.MoveForward();
+            var pickItem = (ITerator<ScoreGroup> sg) =>
+            {
+                var cur = iter.CurrentItem();
+                return new { cur?.GetDelegate().Name, cur?.Score };
+            };
+
+            iter.MoveForward(); var _next = pickItem(iter); iter.MoveBackward();
+            iter.MoveBackward(); var _prev = pickItem(iter); iter.MoveForward();
+
+            //todo: groups that have HasVirtualUser must be marked
             notiController.Add(cur.Score, new NotifyGroup(cur.Players, _prev.Name, _prev.Score, _next.Name, _next.Score, cur.Score, dt));
             notiController.groupedCounter++;
         }

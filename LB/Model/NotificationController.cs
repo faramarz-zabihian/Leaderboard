@@ -27,7 +27,10 @@ namespace LeaderBoard.Base
         {
             if (DateTime.Now > check_time)
             {
-                var list = groups.Where(kv => kv.Value.FirstCreated < check_time.AddMilliseconds(-interval)).Select(p => p.Value).ToList();
+                var list = groups
+                        .Where(kv => kv.Value.FirstCreated < check_time.AddMilliseconds(-interval))
+                        .Select(p => p.Value)
+                        .ToList();
                 if (list.Count > 0)
                 {
                     var bytes = MemoryPackSerializer.Serialize<List<NotifyGroup>>(list);
