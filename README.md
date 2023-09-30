@@ -1,8 +1,8 @@
-## Welcome to my Leaderboard project.
+## Welcome to my Leaderboard project V.0.
 
 Leaderboard assumptions:
 
-- Al players with the same score share the same rank.
+- Players with the same score share the same rank.
 - There is no limit of total scores and lowest rank.
 - There is no negative score.
 
@@ -42,7 +42,7 @@ Any score event causes a player to move to either a pre-existing group or a new 
 
 **Steps:**
 
-1. Lookup the last score, remove player from that group
+1. Lookup the last score, remove player from that group.
 2. Lookup the new score, or create a new one, and add the player
 3. Look for the score groups that must be notified
 
@@ -51,3 +51,5 @@ Any score event causes a player to move to either a pre-existing group or a new 
 - if a group has no online player but its group counter is above zero, a sample user of that score should be retrieved to represent the group.
 - If a group's counter reaches zero, it's eliminated from the array
 - If the removal of a player eliminates the group and does not create a new one, all ranks below the leaving group can be notified selectively.
+
+A Runner class in utility folder demonstrates how to use Leaderboard.
