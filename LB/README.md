@@ -9,7 +9,6 @@ Leaderboard assumptions:
 ### Description of the solution:
 
 The general idea is to emulate a minimal representation of the actual database, with these characteristics:
-r
 - Calculations are done in memory.
 - Only changed records are replicated to DB.
 - Only active users are in the memory.
