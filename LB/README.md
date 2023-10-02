@@ -3,7 +3,7 @@
 Leaderboard assumptions:
 
 - Players with the same score share the same rank.
-- There is no limit of total scores and lowest rank.
+- There is no limit on total scores and the lowest rank.
 - There is no negative score.
 
 ### Description of the solution:
@@ -13,13 +13,13 @@ The general idea is to emulate a minimal representation of the actual database, 
 - Only changed records are replicated to DB.
 - Only active users are in the memory.
 
-These points needed more consideration:
+Points that need careful consideration:
 
 - Player's total score is gradually incrementing; therefore, the new rank of the user is in its vicinity.
 - Total score is always incremental (No zero, No negativity).
 - Rank of a player, is a calculated entirely based on position of its score among others.
-- Only active players change the scores.
-- Application could not wait for the physical DB to respond. And the choice of the DB is left to the service provider.
+- Only active players change the scores and the ranks.
+- Application could not wait for the physical DB to respond. And almost any DB should be acceptable.
 - Since the number of users and the number of transactions per seconds would be overwhelming, solution had to be splittable over multiple servers or processors.
 - Players must be notified about their rank change, and spamming should be avoided.
 
@@ -51,4 +51,4 @@ Any score event causes a player to move to either a pre-existing group or a new 
 - If a group's counter reaches zero, it's eliminated from the array
 - If the removal of a player eliminates the group and does not create a new one, all ranks below the leaving group can be notified selectively.
 
-A Runner class in utility folder demonstrates how to use Leaderboard.
+A Runner class in utility folder demonstrates how to use the Leaderboard.
